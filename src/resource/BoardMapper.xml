@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >  
+   <mapper namespace="finalPJ.a03_dao.A01_BoardDao">
+
+   	<select id="boardList2" resultMap="boardMap" parameterType="String">								
+			SELECT b.*,p.PR_TITLE 
+			FROM BOARD b , PR_PROJECT p
+			WHERE b.PR_NO = p.pr_no AND b.MEM_NAME =#{mem_name}
+		    ORDER BY b.B_INDATE desc
+   	</select>
+   	
+
+   	<select id="boardList3" resultType="board_pm" parameterType="board_pm">		
+			SELECT b.*,pr.PR_TITLE 
+			FROM BOARD b , PR_PROJECT pr
+			WHERE b.pr_no = pr.pr_no  AND mem_no = #{mem_no}
+			ORDER BY b.B_INDATE desc
+   	</select>
+
+    <resultMap type="board" id="boardMap"/>
+
+<!--
+		
+		SELECT pt.ts_title, m.mem_name
+		FROM pr_task pt, members m
+		WHERE pt.mem_no = m.mem_no and pt.pr_no = #{pr_no} AND pt.ts_no = #{ts_no}
+  -->
+
+   	<insert id="insertBoard" parameterType="board">
+   	INSERT INTO board
+   		values(BOARD_NO_SEQ.NEXTVAL,
+		#{mem_name},#{ts_title},sysdate,#{b_content},'검토중',#{pr_no}
+		)
+	
+   	</insert>
+   	
+   	
+
+   	
+   	<select id="getBoard" resultType="board"  parameterType="int">
+   		SELECT b.*, pp.PR_TITLE 
+		FROM BOARD b, PR_PROJECT pp 
+		WHERE b.PR_NO = pp.PR_NO AND board_no=#{board_no}
+   	</select>
+   	<!-- 무조건 소문자로 작성!~!!!!!!!!!!!!!1 -->
+    <update id="updateBoard" parameterType="board">
+		UPDATE BOARD 	
+		SET b_content = #{b_content},
+		 b_indate = sysdate
+		WHERE BOARD_NO = #{board_no}
+	</update>
+	
+   	<delete id="deleteBoard" parameterType="int">
+	DELETE FROM BOARD WHERE board_no = #{board_no}
+	</delete>
+
+	<insert id="uploadFile" parameterType="pmsfile">
+		INSERT INTO pmsfile VALUES(PMSFILE_NO_SEQ.NEXTVAL,
+		board_no_seq.currval,null,
+		#{fname,jdbcType=VARCHAR}, 
+		#{pathname,jdbcType=VARCHAR}, sysdate)
+	</insert>
+	
+	 <select id="fileInfo" resultType="pmsfile" parameterType="int">
+		select * from pmsfile where board_no = #{board_no} 
+	 </select>
+<!-- 
+	
+	 	 <update id="updateFile" parameterType="hashmap">
+	 		update PMSFILE
+			set fname = #{fname}
+			where board_no = #{board_no}
+			and fname=#{orgFname}
+	 	 </update>
+
+ -->
+	   <update id="updateFile" parameterType="hashmap">
+		update pmsfile
+			set fname = #{fname,jdbcType=VARCHAR}
+		where board_no = #{board_no,jdbcType=INTEGER}
+			and fname = #{orgFname,jdbcType=VARCHAR}
+	  </update>
+	 	 
+		<update id="updateboard2" parameterType="board">
+	UPDATE board SET
+	 b_state =#{b_state,jdbcType=VARCHAR},
+	 b_content=#{b_content,jdbcType=VARCHAR} 
+	 WHERE board_no =#{board_no,jdbcType=INTEGER} 
+	</update>
+	 
+	 <!-- 
+	 		// 업무 등록 시 담당 업무명 조회
+		public void getTitle(Board ts);
+	  -->
+	<select id="getTitle" resultMap="boardMap" parameterType="board">
+		SELECT TS_TITLE 
+		FROM PR_TASK
+		WHERE PR_NO = #{pr_no} AND TS_NO = #{ts_no}
+	</select>
+
+
+   </mapper>

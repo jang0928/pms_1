@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="finalPJ.a03_dao.CalenDao">
+<resultMap type="calen" id="calMap">
+   <result property="start" column="start1"/>
+   <result property="end" column="end1"/>
+</resultMap>  
+
+
+
+<!-- 플젝 조회 + 내 일정 조회-->
+<select id="calenList" resultMap="calMap"> 	
+	select * 
+	from calendar 
+	where mem_no = #{mem_no}	
+	union  
+	SELECT DISTINCT pt.PR_NO id, pt.PR_NO groupid, pp.PR_TITLE title, pt.MEM_NO mem_no,'' content, pp.PR_SDATE start1, pp.PR_EDATE end1, 1 ALLDAY, '#747474' textcolor, '#EAEAEA' backgroundcolor, '#EAEAEA' bordercolor   
+	FROM PR_TASK pt, PR_PROJECT pp 
+	WHERE pt.PR_NO = pp.PR_NO AND pt.MEM_NO = #{mem_no}	
+	
+</select>
+
+
+<insert id="insertCalendar" parameterType="calen">
+   INSERT INTO calendar 
+   VALUES (cal_seq.nextval, cal_seq.currval, 
+         #{title}, #{mem_no}, #{content},
+         #{start}, 
+         #{end}, 
+         #{allDay},#{textColor},#{backgroundColor},
+         #{borderColor})
+</insert>  
+<!-- public void updateCalenar(Calendar upt); -->
+<update id="updateCalendar" parameterType="calen">
+		update calendar 
+			set title=#{title}, 
+				content=#{content}, 			
+				start1=#{start},
+				end1=#{end}, 
+				backgroundColor=#{backgroundColor},
+				borderColor=#{borderColor}, 
+				textColor=#{textColor},
+				allDay=#{allDay} 
+		where id= #{id}		
+</update>
+
+<!-- public void deleteCalenar(int id) -->
+<delete id="deleteCalendar" parameterType="int">
+		delete 
+		from calendar 
+		where id = #{id}
+</delete>
+
+
+</mapper>

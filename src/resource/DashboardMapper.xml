@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="finalPJ.a03_dao.DashboardDao">
+   
+<select id="totMem" resultType="int">
+   SELECT COUNT(MEM_NO)
+   FROM MEMBERS
+</select>
+
+<select id="ingMem" resultType="int">
+   SELECT  count(DISTINCT pt.MEM_NO)
+   FROM MEMBERS m ,PR_PROJECT pp, PR_TASK pt 
+   WHERE  pp.PR_NO =pt.PR_NO 
+   AND pt.MEM_NO =m.MEM_NO AND pp.PR_STATE = '진행중'
+</select>
+
+<select id="iRisk" resultType="int">
+   SELECT COUNT(RISK_LIST)
+   FROM RISK
+   WHERE RISK_STATE = '조치중' AND risk_list='Impact'
+   GROUP BY RISK_LIST
+</select>  
+
+<select id="eRisk" resultType="int">
+   SELECT COUNT(RISK_LIST)
+   FROM RISK
+   WHERE RISK_STATE = '조치중' AND risk_list='Event'
+   GROUP BY RISK_LIST
+</select>
+
+<select id="pRisk" resultType="int">
+   SELECT COUNT(RISK_LIST)
+   FROM RISK
+   WHERE RISK_STATE = '조치중' AND risk_list='Probability'
+   GROUP BY RISK_LIST
+</select>    
+
+<select id="projects" resultType="int">
+   SELECT COUNT(*) FROM PR_PROJECT
+</select>    
+
+<select id="period" resultType="int">
+   SELECT SUM(TO_DATE(PR_EDATE)-TO_DATE(PR_SDATE)) FROM PR_PROJECT
+</select>
+
+<resultMap type="dashpro" id="dbMap"/>
+<select id="dashpro" resultMap="dbMap">
+   SELECT PR_TITLE, PR_NO, PR_SDATE, PR_EDATE, 100 AS prog_tot, ROUND((SYSDATE - TO_DATE(PR_SDATE))/(TO_DATE(PR_EDATE)-TO_DATE(PR_SDATE))*100,0) AS prog 
+   FROM PR_PROJECT
+   WHERE PR_STATE = '진행중' AND PR_EDATE >= TO_CHAR(SYSDATE, 'yyyy-mm-dd')
+</select>
+
+
+
+</mapper>

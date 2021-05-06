@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >   
+<mapper namespace="finalPJ.a03_dao.GanttDao">
+	
+	<!-- 
+	프로젝트 명 조회
+	
+	
+	public Pr_project getPrproject(int no);
+
+	<select id="getPrproject" resultType="pr_project" parameterType="int">
+		SELECT pp.*, m.MEM_NAME 
+		FROM PR_PROJECT pp, MEMBERS m 
+		WHERE pp.MEM_NO = m.MEM_NO AND PR_NO = 1
+	</select>
+		 -->
+	<resultMap type="pr_task" id="pr_taskMap"></resultMap>
+	<!-- 
+	프로젝트 업무 조회
+	public ArrayList<Pr_task> ganttList(Pr_task sch);
+	<select id="ganttList" resultMap="pr_taskMap" parameterType="pr_task">
+		SELECT *
+		FROM (
+		SELECT rownum, LEVEL, pp.PR_NO, pt.TS_NO, pt.TS_REFNO, pt.TS_TITLE, pt.TS_SDATE, pt.TS_EDATE, pt.TS_EREAL, pt.TS_RATE,
+				pt.MEM_NO, m.MEM_NAME, pp.PR_TITLE, pp.PR_DATE, pp.PR_SDATE, pp.PR_EDATE, pp.PR_STATE 
+		FROM PR_TASK pt, MEMBERS m, PR_PROJECT pp
+		WHERE pt.MEM_NO = m.MEM_NO AND pt.PR_NO = pp.PR_NO AND pp.PR_NO = #{pr_no}
+		START WITH pp.PR_NO = #{pr_no} AND TS_REFNO = 0
+		CONNECT BY PRIOR TS_NO = TS_REFNO)
+	</select> -->
+	
+	<select id="ganttList" resultType="pr_task" parameterType="int">
+	SELECT *
+	FROM (
+	SELECT rownum, LEVEL, pp.PR_NO, pt.TS_NO, pt.TS_REFNO, pt.TS_TITLE, pt.TS_SDATE, pt.TS_EDATE, pt.TS_EREAL, pt.TS_RATE,
+			pt.MEM_NO, m.MEM_NAME, pp.PR_TITLE, pp.PR_DATE, pp.PR_SDATE, pp.PR_EDATE, pp.PR_STATE 
+	FROM PR_TASK pt, MEMBERS m, PR_PROJECT pp
+	WHERE pt.MEM_NO = m.MEM_NO AND pt.PR_NO = pp.PR_NO AND pp.PR_NO = #{pr_no} AND LEVEL BETWEEN 1 AND 2
+	START WITH pp.PR_NO = #{pr_no} AND TS_REFNO = 0
+	CONNECT BY PRIOR TS_NO = TS_REFNO)
+	</select>
+	
+	<!-- 업무 등록 public void insertTask(Pr_task ins); --> 
+	<insert id="insertTask" parameterType="pr_task">
+		INSERT INTO PR_TASK VALUES(#{pr_no}, PR_TASK_NO_SEQ.NEXTVAL, #{ts_refno}, #{ts_title}, #{ts_sdate}, 
+			#{ts_edate}, #{ts_ereal}, #{ts_rate}, #{mem_no})
+	</insert> 	
+	
+	<!-- 부서별 인원 조회 public ArrayList<Members> getmems(int deptno)<resultMap type="Members" id="memMap"/> -->
+	<select id="getmems" resultType="pr_task" parameterType="int">
+		SELECT MEM_NO, MEM_NAME 
+		FROM MEMBERS
+		WHERE DEPTNO = #{deptno}
+		ORDER BY MEM_NO
+	</select>
+	
+	<!-- 
+	프로젝트 업무 상세 페이지 조회
+	public Pr_task getTask(Pr_task sch);   AND pt.TS_TITLE = #{ts_title}
+	 -->
+	 <select id="getTask" resultMap="pr_taskMap" parameterType="pr_task">
+		SELECT pp.*, pt.*, m.MEM_NAME 
+		FROM PR_PROJECT pp, PR_TASK pt, MEMBERS m
+		WHERE pp.PR_NO = pt.PR_NO AND pt.MEM_NO = m.MEM_NO AND pt.PR_NO = #{pr_no} AND pt.TS_NO = #{ts_no}
+	 </select>
+	 
+	<!-- public void updateTask(Pr_task upt); -->
+	<update id="updateTask" parameterType="pr_task">
+		UPDATE PR_TASK
+			SET ts_refno = #{ts_refno},
+				ts_title = #{ts_title},
+				ts_rate = #{ts_rate},
+				ts_sdate = #{ts_sdate},
+				ts_edate = #{ts_edate},
+				ts_ereal = #{ts_ereal},
+				mem_no = #{mem_no}
+			WHERE pr_no = #{pr_no} AND ts_no = #{ts_no}	
+	</update>
+	
+	<!-- 	
+	// 프로젝트 업무 삭제
+	public void deleteTask(Pr_task del);
+	-->
+	<delete id="deleteTask" parameterType="pr_task">
+		DELETE FROM PR_TASK
+		WHERE PR_NO = #{pr_no} AND TS_NO =#{ts_no} OR TS_REFNO = #{ts_no}
+	</delete>
+	
+	<!-- 	
+	// 프로삭제 업무 삭제 후 그 다음번호들 -1 수정
+	public void uptdelTask(Pr_task del);
+	<update id="uptdelTask" parameterType="pr_task">
+		UPDATE PR_TASK
+			SET TS_NO = TS_NO-1
+			WHERE PR_NO = #{pr_no} AND TS_NO > #{ts_no}	
+	</update> -->
+	
+	<!-- 프로젝트별 등록된 상위 업무 목록 조회 public ArrayList<Pr_task> getrefno(int pr_no) -->
+	<select id="getrefno" resultType="pr_task" parameterType="int">
+		SELECT *
+		FROM PR_TASK
+		WHERE PR_NO = #{pr_no} AND TS_REFNO = 0
+		ORDER BY TS_NO
+	</select>	
+	
+	
+	
+	<!-- 
+	특정 프로젝트 사원 조회 public ArrayList<Pr_task> getMems();	
+	<select id="ganttList" resultType="int" parameterType="int">
+	SELECT DISTINCT mem_name, m.MEM_NO 
+		FROM PR_TASK pt, MEMBERS m 
+		WHERE pt.MEM_NO = m.MEM_NO AND PR_NO = #{pr_no}
+		ORDER BY m.MEM_NO
+		public ArrayList<Pr_task> projectList(int pr_no);
+	</select> -->
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

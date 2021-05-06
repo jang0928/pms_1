@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >   
+<mapper namespace="finalPJ.a03_dao.MemberDao">
+<!-- 
+// 	springweb.a02_mvc.a03_dao.A04_CalenDao
+	public ArrayList<Calendar> calenList();
+ -->
+	<resultMap type="Members" id="memResult"></resultMap>
+	
+	<select id="login" resultType="Members" parameterType="Members">
+	select* from members where mem_no=#{mem_no} and mem_pass=#{mem_pass}
+	
+	</select>
+	
+	<select id="mail" resultType="Members" parameterType="int">
+		select *
+		from members
+		where mem_no=#{mem_no}
+	
+	</select>
+	
+	<select id="memlist" resultType="Members" parameterType="Members">
+		SELECT  DISTINCT d.dname,pt.MEM_NO, pr_title,pr_sdate,pr_edate,
+		MEM_NAME,auth
+		FROM MEMBERS m ,PR_PROJECT pp, PR_TASK pt ,dept d
+		WHERE  pp.PR_NO =pt.PR_NO 
+		AND pt.MEM_NO =m.MEM_NO AND pp.PR_STATE = '진행중' AND m.DEPTNO =d.DEPTNO 
+		ORDER BY PR_TITLE
+	</select>
+	
+	<select id="memlist_2" resultType="Members" parameterType="Members">
+		SELECT dname, mem_name,email,pnum,auth,mem_no,mem_pass FROM members m,dept d
+		WHERE m.DEPTNO =d.DEPTNO AND MEM_NO != ALL (
+			SELECT  DISTINCT pt.MEM_NO
+			FROM MEMBERS m ,PR_PROJECT pp, PR_TASK pt 
+			WHERE  pp.PR_NO =pt.PR_NO 
+			AND pt.MEM_NO =m.MEM_NO AND pp.PR_STATE = '진행중')
+			ORDER BY MEM_NO
+	</select>
+
+
+	<select id="memDetail" resultType="Members" parameterType="int">
+		SELECT m.*,dname FROM members m, dept d WHERE m.DEPTNO =d.DEPTNO AND mem_no=#{mem_no}
+	</select>
+
+	 <resultMap type="dept" id="deptMap"/>
+	<select id="getDepts" resultMap="deptMap">
+		SELECT * FROM DEPT
+	</select>
+	
+	<select id="deptDetail" parameterType="int" resultType="dept">
+		SELECT d.*,mem_name,mem_no FROM DEPT d, MEMBERS m 
+		WHERE d.DEPTNO =#{deptno,jdbcType=INTEGER} AND d.DEPTNO =m.DEPTNO 
+	</select>
+	
+		<select id="deptDetail2" parameterType="int" resultType="dept">
+		SELECT * FROM DEPT d
+		WHERE d.DEPTNO =#{deptno,jdbcType=INTEGER}
+	</select>
+	
+ 	<insert id="memInsert" parameterType="Members">
+ 		INSERT INTO Members VALUES(Members_no_seq.nextval, #{mem_pass}, 
+ 		#{mem_name},#{deptno}, #{email}, #{pnum}, #{auth},'투입전')
+ 		
+ 	</insert>
+ 	<insert id="deptInsert" parameterType="dept">
+ 		INSERT INTO dept VALUES (dept_no_seq.nextval, #{dname})
+ 		
+ 	</insert>
+ 	
+ 	
+
+ 	<update id="memUpdate" parameterType="Members">
+ 	UPDATE  (SELECT m.mem_no, m.mem_pass, m.mem_name,m.email,
+              m.auth,m.deptno
+          FROM members m , DEPT d
+         WHERE d.deptno = m.deptno
+        ) SET MEM_NAME =#{mem_name jdbcType=VARCHAR}, mem_pass= #{mem_pass},
+        email=#{email},auth =#{auth}, deptno= #{deptno}
+        WHERE mem_no=#{mem_no}
+ 	
+ 	</update>
+ 	
+ 	<update id="deptUpdate" parameterType="dept">
+ 		UPDATE dept SET dname=#{dname} WHERE DEPTNO =#{deptno}
+ 	</update>
+ 	
+ 	<delete id="deptDelete" parameterType="int">
+ 		delete FROM dept where deptno=#{deptno}
+ 	</delete>
+ 	
+ 	<delete id="memDelete" parameterType="int">
+ 		delete FROM members where mem_no=#{mem_no}
+ 	</delete>
+ 	
+ 	<update id="memzero" parameterType="int">
+ 	UPDATE MEMBERS SET DEPTNO =9999 WHERE DEPTNO =#{deptno}
+ 	</update>
+
+<!--
+
+
+SELECT  DISTINCT pt.pr_no ,r.mem_no,r.DEPTNO ,r.mem_name FROM members r ,PR_PROJECT p ,PR_TASK pt 
+WHERE  pt.PR_NO =p.PR_NO AND r.mem_no =1002 AND pt.MEM_NO =r.MEM_NO 
+  -->
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

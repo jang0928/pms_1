@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<typeAliases>
+		<typeAlias alias="pr_task" type="finalPJ.z01_vo.Pr_task"/>
+		<typeAlias alias="pr_project" type="finalPJ.z01_vo.Pr_project"/>
+		<typeAlias type="finalPJ.z01_vo.Members" alias="Members"/>
+		<typeAlias type="finalPJ.z01_vo.Board" alias="board"/>
+		<typeAlias type="finalPJ.z01_vo.Board_PM" alias="board_pm"/>
+		<typeAlias type="finalPJ.z01_vo.Dept" alias="dept"/>
+		<typeAlias type="finalPJ.z01_vo.Risk" alias="risk"/>
+		<typeAlias type="finalPJ.z01_vo.Calendar" alias="calen"/>
+		<typeAlias type="finalPJ.z01_vo.Project" alias="newProject"/>
+		<typeAlias alias="dashboard" type="finalPJ.z01_vo.Dashboard"/>
+        <typeAlias alias="dashpro" type="finalPJ.z01_vo.DashPro"/>
+        <typeAlias type="finalPJ.z01_vo.Pmsfile" alias="pmsfile"/>
+
+	</typeAliases>
+
+	<mappers>
+		<mapper resource="resource/MemberMapper.xml"/>
+		<mapper resource="resource/GanttMapper.xml"/>
+		<mapper resource="resource/RiskMapper.xml"/>
+		<mapper resource="resource/BoardMapper.xml"/>
+		<mapper resource="resource/CalenMapper.xml"/>
+		<mapper resource="resource/ProjectMapper.xml"/>
+		<mapper resource="resource/DashboardMapper.xml"/>
+	</mappers>
+
+	
+</configuration>

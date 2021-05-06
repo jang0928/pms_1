@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >   
+<mapper namespace="finalPJ.a03_dao.ProjectDao">
+	
+	<resultMap type="pr_project" id="pr_projectMap"></resultMap>
+
+	<!-- 내가 참여한 프로젝트 조회(pm)
+	public ArrayList<Pr_task> pjtListP(int pr_no);
+	</select> -->
+	<select id="pjtListP" resultType="pr_project" parameterType="int">
+		SELECT p.*, r.MEM_NAME 
+		FROM members r ,PR_PROJECT p
+		WHERE r.MEM_NO = p.MEM_NO AND r.MEM_NO = #{mem_no}
+		ORDER BY p.PR_NO	
+	</select>
+	<!-- 내가 참여한 프로젝트 조회(사원)
+	public ArrayList<Pr_task> pjtListS(int pr_no);
+	</select> -->
+	<select id="pjtListS" resultType="pr_project" parameterType="int">
+	   SELECT DISTINCT p.*, r.MEM_NAME
+	   FROM members r ,PR_PROJECT p ,PR_TASK pt 
+	   WHERE pt.PR_NO =p.PR_NO AND r.mem_no = #{mem_no}	
+	   AND pt.MEM_NO =r.MEM_NO	
+	   ORDER BY p.PR_NO
+	</select>
+	
+	<!-- 프로젝트 등록 public void proInsert(Pr_project ins); -->
+	<insert id="proInsert" parameterType="pr_project">
+		INSERT INTO PR_PROJECT VALUES(PR_PROJECT_NO_SEQ.NEXTVAL, #{pr_title}, sysdate, #{pr_sdate}, #{pr_edate}, #{pr_state}, #{mem_no})
+	</insert>
+	
+	<!-- 특정 프로젝트 상세 조회 public Pr_project getProject(int pr_no) -->
+	<select id="getProject" resultType="pr_project" parameterType="int">
+		SELECT pp.*, m.MEM_NAME 
+		FROM PR_PROJECT pp ,MEMBERS m 
+		WHERE pp.MEM_NO = m.MEM_NO AND PR_NO = #{pr_no}
+	</select>
+	
+	<!-- 특정 프로젝 트 수정 	public void updateProject(Pr_project pUpt); -->
+	<update id="updateProject" parameterType="pr_project">
+		UPDATE PR_PROJECT
+		SET PR_TITLE = #{pr_title},
+			PR_SDATE = #{pr_sdate},
+			PR_EDATE = #{pr_edate},
+			PR_STATE = #{pr_state},
+			MEM_NO = #{mem_no}
+		WHERE PR_NO = #{pr_no}
+	</update>
+	
+	<!-- 특정 프로젝트 삭제 public void deleteProject(Pr_project pDel); -->	
+	<delete id="deleteProject" parameterType="int">
+		DELETE FROM PR_PROJECT
+		WHERE PR_NO = #{pr_no}
+	</delete>
+	
+	<!-- 등록된 pm 조회 public ArrayList<Members> getMemPm() -->
+	<resultMap type="Members" id="memMap"></resultMap>
+	<select id="getMemPm" resultMap="memMap">
+		SELECT *
+		FROM MEMBERS
+		WHERE AUTH = 'pm'
+	</select>	
+		
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

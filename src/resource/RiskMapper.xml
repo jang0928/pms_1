@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace = "finalPJ.a03_dao.Risk_List_Dao">
+	<!-- AND p.pr_no = #{pr_no}
+		AND mem_name = #{mem_name}
+	 -->
+	<resultMap type = "risk" id = "riskMap"></resultMap>
+	<!-- 리스크 목록 조회  (pm 일떄)-->
+	<select id = "riskList" resultMap = "riskMap"
+			parameterType = "int">
+		SELECT DISTINCT  p.PR_TITLE ,r.ts_title, r.risk_title, r.mem_name, r.risk_list,
+				r.risk_state, r.risk_sol, r.risk_no,RISK_INDATE ,RISK_FINDATE 
+		FROM RISK r , PR_PROJECT p ,members m
+		WHERE   m.MEM_no =p.MEM_no AND p.PR_NO = r.PR_NO AND p.MEM_NO = #{mem_no}
+		ORDER BY RISK_INDATE DESC
+
+	</select>
+	
+	<!--로그인한 아이디의 Pr_no 받아오기 -->
+<!-- 	<select id = "risk_pr" resultType= "int"
+			parameterType = "int">
+	SELECT DISTINCT pt.pr_no FROM MEMBERS m ,PR_TASK pt WHERE m.MEM_NO = pt.MEM_NO 
+		and m.MEM_NO =#{mem_no ,jdbcType=INTEGER} and pt.PR_STATE ='진행중'
+	</select>
+	 -->
+	
+	<select id = "pri_riskList" resultType = "risk"
+			parameterType = "int">
+			SELECT DISTINCT ts_title, risk_title, r.mem_name, risk_list,
+				risk_state, risk_sol,risk_no,RISK_INDATE ,RISK_FINDATE 
+		FROM RISK r , PR_PROJECT p ,members m
+		WHERE  m.MEM_NO =#{mem_no}
+		AND m.MEM_NAME =r.MEM_NAME  ORDER BY RISK_INDATE DESC
+	</select>
+	
+	
+	 <select id="fileInfo" resultType="pmsfile" parameterType="int">
+		select * from pmsfile where risk_no = #{risk_no} 
+	 </select>
+	 
+	
+	
+	
+	<!-- 리스크 등록 -->
+	<insert id = "insertRisk" parameterType = "risk">
+		INSERT INTO risk (risk_no, risk_title, risk_content,
+							mem_name, risk_list, risk_state, 
+							risk_indate,ts_title,pr_no)
+		VALUES(risk_no_seq.nextval, #{risk_title},
+				#{risk_content,jdbcType=VARCHAR}, #{mem_name,jdbcType=VARCHAR}, #{risk_list,jdbcType=VARCHAR},
+				'조치전', sysdate, #{ts_title,jdbcType=VARCHAR},#{pr_no,jdbcType=INTEGER})
+	</insert>
+	
+	<!-- 리스크 상세 화면 -->
+		<select id="getRisk" resultType="risk" parameterType="int">
+			SELECT a.*, pr_TITLE FROM RISK a, PR_PROJECT pp 
+		WHERE a.PR_NO =pp.PR_NO  and a.RISK_NO =#{risk_no}
+	</select>
+	
+<!-- 		SELECT  pr_title,ts_title,risk_title,mem_name,
+	risk_list,risk_state ,RISK_FINDATE 
+	FROM RISK r ,PR_PROJECT p
+	WHERE r.PR_NO =p.PR_NO and MEM_NAME =#{mem_name,jdbcType=VARCHAR}
+	AND p.PR_NO=#{pr_no} -->
+	<select id="getTsTitle" resultType="risk" parameterType="risk">
+SELECT DISTINCT  p.PR_NO ,p.pr_title,pt.TS_TITLE FROM PR_TASK pt, RISK r ,PR_PROJECT p
+		WHERE r.PR_NO =pt.PR_NO AND pt.MEM_NO =#{mem_no} AND r.PR_NO =p.PR_NO AND p.PR_STATE ='진행중'
+	</select>
+	
+	<select id="getPrTitle" resultType="risk" parameterType="risk">
+	SELECT DISTINCT pt.pr_no,pp.PR_TITLE  FROM PR_TASK pt ,MEMBERS m , PR_PROJECT pp 
+		WHERE   pt.MEM_NO =#{mem_no} AND pt.PR_NO =pp.PR_NO AND pp.PR_STATE= '진행중'
+	</select>
+	
+		<insert id="uploadFile" parameterType="pmsfile">
+		INSERT INTO pmsfile VALUES(PMSFILE_NO_SEQ.NEXTVAL,null, risk_no_seq.currval,#{fname,jdbcType=VARCHAR}, #{pathname,jdbcType=VARCHAR}, sysdate)
+	</insert>	
+	<!--  pm  -->
+	
+	<update id="updateRisk2" parameterType="risk">
+	UPDATE risk SET
+	risk_title = #{risk_title}, risk_state =#{risk_state,jdbcType=VARCHAR},risk_sol
+	 =#{risk_sol} , risk_content=#{risk_content}, risk_findate = sysdate WHERE risk_no =#{risk_no,jdbcType=INTEGER} 
+	</update>
+	 
+ 	 <update id="updateRisk" parameterType="risk">
+	UPDATE risk SET risk_content = #{risk_content},risk_title
+	 =#{risk_title} WHERE risk_no = #{risk_no}
+	 </update> 
+	 
+	 <!--
+	 	UPDATE risk SET risk_sol=#{risk_sol,jdbcType=VARCHAR},risk_state = #{risk_state,jdbcType=VARCHAR},risk_findate = sysdate WHERE risk_no = #{risk_no,jdbcType=INTEGER}
+	   -->
+	 
+
+<!-- 리스크 상세 화면에서 삭제 처리 -->
+<!-- ,risk_content = #{risk_content},risk_sol
+	 =#{risk_sol},risk_state = #{risk_state},risk_findate = sysdate WHERE risk_no = #{risk_no}  -->
+
+
+<delete id="deleteRisk" parameterType="int">
+DELETE FROM risk WHERE risk_no =#{risk_no} 
+</delete>
+
+  <update id="updateFile" parameterType="hashmap">
+		update pmsfile
+			set fname = #{fname,jdbcType=VARCHAR}
+		where risk_no = #{risk_no,jdbcType=INTEGER}
+			and fname = #{orgFname,jdbcType=VARCHAR}
+	  </update>
+
+<!--  <update id="updateFile" parameterType="hashmap">
+		update boardfile
+			set fname = #{fname}
+		where no = #{no}
+			and fname = #{orgFname}
+	  </update> -->
+	
+	
+</mapper>
